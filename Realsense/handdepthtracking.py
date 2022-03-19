@@ -50,7 +50,8 @@ while True:
     depth_image = np.asanyarray(aligned_depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
     
-    grey_color = 153
+    # 
+    grey_color = cv2.COLOR_BAYER_BG2GRAY
     depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels
     bg_removed = np.where((depth_image_3d > clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
     
