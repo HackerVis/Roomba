@@ -1,7 +1,7 @@
-# TechVidvan hand Gesture Recognizer
+# This code is aligned to work with the training data in this repository
+
 
 # import necessary packages
-
 import cv2
 import numpy as np
 import mediapipe as mp
