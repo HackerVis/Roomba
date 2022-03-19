@@ -77,6 +77,8 @@ while True:
             if handList[thumb_Coord[0]][0] > handList[thumb_Coord[1]][0]:
                 upCount += 1
             cv2.putText(img, str(upCount), (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            print(handList)
+            time.sleep(1)
 
     cv2.imshow("Counting number of fingers", img)
     cv2.waitKey(1)
