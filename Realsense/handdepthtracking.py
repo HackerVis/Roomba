@@ -14,19 +14,23 @@ hands = mpHands.Hands(static_image_mode=False,
                       min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
 
+# FPS counter
 pTime = 0
 cTime = 0
 
+# Set up the realsense for different types of usage
 pipeline = rs.pipeline()
 config = rs.config()
-config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 30) #This is for depth
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30) #This is for color
+config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 60) #This is for depth
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60) #This is for color
 profile = pipeline.start(config)
 
+# Get our sensors ready
 depth_sensor = profile.get_device().first_depth_sensor()
 depth_scale = depth_sensor.get_depth_scale()
 print("Depth Scale is: " , depth_scale)
 
+# What's the cutoff for depth
 clipping_distance_in_meters = 0.5
 clipping_distance = clipping_distance_in_meters / depth_scale
 
@@ -47,38 +51,41 @@ while True:
     if not aligned_depth_frame or not color_frame:
         continue
 
+    # Get our images
     depth_image = np.asanyarray(aligned_depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
     
-    # 
+    # set what the background color to negate is and get teh new images
     grey_color = cv2.COLOR_BAYER_BG2GRAY
     depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels
     bg_removed = np.where((depth_image_3d > clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
     
-    img = bg_removed # Chamget to "color_image for normal"
+    img = bg_removed # Change to "color_image for normal"
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(imgRGB)
-    #print(results.multi_hand_landmarks)
 
+    # If a hand is found, draw it
     if results.multi_hand_landmarks:
         for handLms in results.multi_hand_landmarks:
             for id, lm in enumerate(handLms.landmark):
-                #print(id,lm)
                 h, w, c = img.shape
                 cx, cy = int(lm.x *w), int(lm.y*h)
-                #if id ==0:
                 cv2.circle(img, (cx,cy), 3, (255,0,255), cv2.FILLED)
 
             mpDraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS)
 
-
+    # FPS
     cTime = time.time()
     fps = 1/(cTime-pTime)
     pTime = cTime
 
+    # Put FPS text in top right
     cv2.putText(img,str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
 
+    # Show the image
     cv2.imshow("Image", img)
+
+    # Wait for esc key press
     key = cv2.waitKey(1)
     if key & 0xFF == ord('q') or key == 27:
         cv2.destroyAllWindows()
