@@ -1,3 +1,4 @@
+from itertools import count
 from queue import Empty
 import cv2
 import mediapipe as mp
@@ -18,8 +19,9 @@ pipeline = rs.pipeline()
 align_to = rs.stream.color
 align = rs.align(align_to)
 
-finger_Coord = [(8, 6), (12, 10), (16, 14), (20, 18)]
+finger_Coord = [(8, 6), (16, 14), (20, 18)]
 thumb_Coord = (4,2)
+middle_Coord = (12, 10)
 
 config = rs.config()
 
@@ -72,13 +74,16 @@ while True:
                 cv2.circle(img, point, 10, (255, 255, 0), cv2.FILLED)
             upCount = 0
             for coordinate in finger_Coord:
-                if handList[coordinate[0]][1] < handList[coordinate[1]][1]:
-                    upCount += 1
-            if handList[thumb_Coord[0]][0] > handList[thumb_Coord[1]][0]:
-                upCount += 1
-            cv2.putText(img, str(upCount), (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
-            print(handList)
-            time.sleep(1)
+                if handList[middle_Coord[0]][1] + 125  <  handList[coordinate[1]][1]:
+                    cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+                    # upCount += 1
+            #     if handList[coordinate[0]][1] < handList[coordinate[1]][1]: # if the 0th index of a coordinate in finger_coords < 1st index of a coordinate in finger_cords (if a finger is raised)
+            #         upCount += 1
+            # if handList[thumb_Coord[0]][0] > handList[thumb_Coord[1]][0]:
+            #     upCount += 1
+            # cv2.putText(img, str(upCount), (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            print(handList[12])
+            # time.sleep(1)
 
     cv2.imshow("Counting number of fingers", img)
     cv2.waitKey(1)
