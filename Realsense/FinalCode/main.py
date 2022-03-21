@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import pyrealsense2 as rs
 import numpy as np
+from mf_detect_module import middleFinger
 
 config = rs.config()
 
@@ -31,8 +32,13 @@ while True:
     depth_image = np.asanyarray(aligned_depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
 
-    img = color_image # Change to "color_image for normal"
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    middleF = middleFinger(color_image) # check if middle finger is shown
+    if(middleF is not False):
+        img = middleF # Change to "color_image for normal image"
+        print(True)
+    else:
+        img = color_image
+
     cv2.imshow("Image", img)
     key = cv2.waitKey(1)
     if key & 0xFF == ord('q') or key == 27:
