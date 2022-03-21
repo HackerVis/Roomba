@@ -66,7 +66,7 @@ while True:
                 cv2.circle(img, point, 3, (255, 0, 0), cv2.FILLED)
             middleAboveCount = 0 # how many fingers are above the middle finger
             for coordinate in finger_Coord:
-                if handList[middle_Coord[0]][1] + 28.5  <  handList[coordinate[0]][1]:
+                if handList[middle_Coord[0]][1] + 38.5  <  handList[coordinate[0]][1] or handList[middle_Coord[0]][1] + 8.5  <  handList[coordinate[0]][1]:
                     middleAboveCount += 1
             if(middleAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
                 frameMiddle += 1
