@@ -20,7 +20,6 @@ middle_Coord = (11, 10) # middle finger coords - with 11 being the CENTER of the
 p_finger_Coord = [(8, 6), (11, 10), (16, 14)] # all fingers EXCEPT the thumb and pinky, as you can flip off with the thumb
 pinky_Coord = (19, 18) # pinky coords - with 19 being the CENTER of the pinky
 
-
 config = rs.config()
 
 config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 60) # This is for depth
