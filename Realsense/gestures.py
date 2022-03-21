@@ -1,5 +1,3 @@
-# Pinky = stop
-
 import cv2
 import mediapipe as mp
 import pyrealsense2 as rs
@@ -16,8 +14,12 @@ pipeline = rs.pipeline()
 align_to = rs.stream.color
 align = rs.align(align_to)
 
+finger_Coord = [(8, 6), (16, 14), (20, 18)] # all fingers EXCEPT the thumb, as you can flip off with the thumb
+middle_Coord = (11, 10) # middle finger coords - with 11 being the CENTER of the middle finger
+
 p_finger_Coord = [(8, 6), (11, 10), (16, 14)] # all fingers EXCEPT the thumb and pinky, as you can flip off with the thumb
 pinky_Coord = (19, 18) # pinky coords - with 19 being the CENTER of the pinky
+
 
 config = rs.config()
 
@@ -32,7 +34,8 @@ align_to = rs.stream.color
 align = rs.align(align_to)
 
 framePinky = 0 # how many frames the pinky finger is visible for
-frameThresh = 5 # frames the finger should be visible for threshold
+frameMiddle = 0 # how many frames the middle finger is visible for
+frameThresh = 5 # frames the finger should be visible for
 
 while True:
     frames = pipeline.wait_for_frames()
@@ -66,18 +69,30 @@ while True:
                 handList.append((cx, cy))
             for point in handList:
                 cv2.circle(img, point, 3, (255, 0, 0), cv2.FILLED)
+            middleAboveCount = 0 # how many fingers are above the middle finger
+            mid = False
             pinkyAboveCount = 0 # how many fingers are below the middle finger
+            for coordinate in finger_Coord:
+                if handList[middle_Coord[0]][1] + 38.5  <  handList[coordinate[0]][1] or handList[middle_Coord[0]][1] + 8.5  <  handList[coordinate[0]][1]:
+                    middleAboveCount += 1
+            if(middleAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
+                frameMiddle += 1
+                if(frameMiddle > frameThresh): # if the finger is there for longer than *frameThresh* frames
+                    mid = True
+                    cv2.putText(img, "Mid", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            else: # reset frames if not middle finger up
+                frameMiddle = 0
             for coordinate in p_finger_Coord:
                 if handList[pinky_Coord[0]][1] + 38.5  <  handList[coordinate[0]][1] or handList[pinky_Coord[0]][1] + 8.5  <  handList[coordinate[0]][1]:
                     pinkyAboveCount += 1
-            if(pinkyAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
+            if(pinkyAboveCount >= 3 and not mid): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
                 framePinky += 1
                 if(framePinky > frameThresh): # if the finger is there for longer than *frameThresh* frames
                     cv2.putText(img, "stp", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
             else: # reset frames if not pinky finger up
                 framePinky = 0
 
-            print(pinkyAboveCount) # debug statement
+            # print(frameMiddle)
 
     cv2.imshow("MF", img)
     key = cv2.waitKey(1)
