@@ -29,6 +29,9 @@ depth_sensor = profile.get_device().first_depth_sensor()
 align_to = rs.stream.color
 align = rs.align(align_to)
 
+frameMiddle = 0 # how many frames the middle finger is visible for
+frameThresh = 30 # frames the finger should be visible for
+
 while True:
     frames = pipeline.wait_for_frames()
 
@@ -49,8 +52,7 @@ while True:
 
     results = hands.process(imgRGB)
 
-    frameMiddle = 0 # how many frames the middle finger is visible for
-    frameThresh = 30 # frames the finger should be visible for
+
 
     multiLandMarks = results.multi_hand_landmarks
     if multiLandMarks:
@@ -71,12 +73,13 @@ while True:
             
             if(middleAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
                 frameMiddle += 1
-                if(frameMiddle > frameThresh):
-                    cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            
+            if(frameMiddle > frameThresh):
+                cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
             else:
                 frameMiddle = 0
 
-            print(middleAboveCount)
+            print(frameMiddle)
 
     cv2.imshow("MF", img)
     key = cv2.waitKey(1)
