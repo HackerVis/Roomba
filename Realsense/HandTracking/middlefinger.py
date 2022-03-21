@@ -11,8 +11,6 @@ hands = mp_Hands.Hands(static_image_mode=False,
 mpDraw = mp.solutions.drawing_utils
 
 pipeline = rs.pipeline()
-align_to = rs.stream.color
-align = rs.align(align_to)
 
 finger_Coord = [(8, 6), (16, 14), (20, 18)] # all fingers EXCEPT the thumb, as you can flip off with the thumb
 middle_Coord = (11, 10) # middle finger coords - with 11 being the CENTER of the middle finger
