@@ -76,15 +76,15 @@ while True:
             for coordinate in finger_Coord:
                 if handList[middle_Coord[0]][1] + 28.5  <  handList[coordinate[0]][1]:
                     middleAboveCount += 1
-                    if(middleAboveCount == 4):
-                        cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            if(middleAboveCount >= 3):
+                cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
                     # upCount += 1
             #     if handList[coordinate[0]][1] < handList[coordinate[1]][1]: # if the 0th index of a coordinate in finger_coords < 1st index of a coordinate in finger_cords (if a finger is raised)
             #         upCount += 1
             # if handList[thumb_Coord[0]][0] > handList[thumb_Coord[1]][0]:
             #     upCount += 1
             # cv2.putText(img, str(upCount), (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
-            print(handList[12])
+            print(middleAboveCount)
             # time.sleep(1)
 
     cv2.imshow("Counting number of fingers", img)
