@@ -52,8 +52,6 @@ while True:
 
     results = hands.process(imgRGB)
 
-
-
     multiLandMarks = results.multi_hand_landmarks
     if multiLandMarks:
         handList = []
@@ -70,16 +68,14 @@ while True:
             for coordinate in finger_Coord:
                 if handList[middle_Coord[0]][1] + 28.5  <  handList[coordinate[0]][1]:
                     middleAboveCount += 1
-            
             if(middleAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
                 frameMiddle += 1
-            
-                if(frameMiddle > frameThresh):
-                    cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
-            else:
+                if(frameMiddle > frameThresh): # if the finger is there for longer than *frameThresh* frames
+                    cv2.putText(img, "Mid", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            else: # reset frames if not middle finger up
                 frameMiddle = 0
 
-            print(frameMiddle)
+            # print(frameMiddle)
 
     cv2.imshow("MF", img)
     key = cv2.waitKey(1)
