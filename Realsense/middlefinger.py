@@ -1,8 +1,5 @@
-from itertools import count
-from queue import Empty
 import cv2
 import mediapipe as mp
-import time
 import pyrealsense2 as rs
 import numpy as np
 
@@ -13,29 +10,27 @@ hands = mp_Hands.Hands(static_image_mode=False,
                       min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
 
-pTime = 0
-cTime = 0
 pipeline = rs.pipeline()
 align_to = rs.stream.color
 align = rs.align(align_to)
 
-finger_Coord = [(8, 6), (16, 14), (20, 18)]
-thumb_Coord = (4,2)
-middle_Coord = (11, 10)
+finger_Coord = [(8, 6), (16, 14), (20, 18)] # all fingers EXCEPT the thumb, as you can flip off with the thumb
+middle_Coord = (11, 10) # middle finger coords - with 11 being the CENTER of the middle finger
 
 config = rs.config()
 
-config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 60) #This is for depth
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60) #This is for color
+config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 60) # This is for depth
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60) # This is for color
 
 profile = pipeline.start(config)
 
 depth_sensor = profile.get_device().first_depth_sensor()
 
-
-
 align_to = rs.stream.color
 align = rs.align(align_to)
+
+frameMiddle = 0 # how many frames the middle finger is visible for
+frameThresh = 5 # frames the finger should be visible for
 
 while True:
     frames = pipeline.wait_for_frames()
@@ -49,9 +44,6 @@ while True:
     if not aligned_depth_frame or not color_frame:
         continue
  
-    depth_image = np.asanyarray(aligned_depth_frame.get_data())
-    color_image = np.asanyarray(color_frame.get_data())
-
     depth_image = np.asanyarray(aligned_depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
 
@@ -71,20 +63,24 @@ while True:
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 handList.append((cx, cy))
             for point in handList:
-                cv2.circle(img, point, 2, (255, 255, 0), cv2.FILLED)
-            upCount = 0
+                cv2.circle(img, point, 3, (255, 0, 0), cv2.FILLED)
+            middleAboveCount = 0 # how many fingers are above the middle finger
             for coordinate in finger_Coord:
-                
-                if handList[middle_Coord[0]][1] + 15  <  handList[coordinate[0]][1]:
-                    cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
-                    # upCount += 1
-            #     if handList[coordinate[0]][1] < handList[coordinate[1]][1]: # if the 0th index of a coordinate in finger_coords < 1st index of a coordinate in finger_cords (if a finger is raised)
-            #         upCount += 1
-            # if handList[thumb_Coord[0]][0] > handList[thumb_Coord[1]][0]:
-            #     upCount += 1
-            # cv2.putText(img, str(upCount), (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
-            print(handList[12])
-            # time.sleep(1)
+                if handList[middle_Coord[0]][1] + 38.5  <  handList[coordinate[0]][1] or handList[middle_Coord[0]][1] + 8.5  <  handList[coordinate[0]][1]:
+                    middleAboveCount += 1
+            if(middleAboveCount >= 3): # if the amount of fingers (not the thumb) is greater or equal to 3 (index, ring, pinky)
+                frameMiddle += 1
+                if(frameMiddle > frameThresh): # if the finger is there for longer than *frameThresh* frames
+                    cv2.putText(img, "Mid", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+            else: # reset frames if not middle finger up
+                frameMiddle = 0
 
-    cv2.imshow("Counting number of fingers", img)
-    cv2.waitKey(1)
+            # print(frameMiddle)
+
+    cv2.imshow("MF", img)
+    key = cv2.waitKey(1)
+    if key & 0xFF == ord('q') or key == 27:
+        cv2.destroyAllWindows()
+        break
+    
+
