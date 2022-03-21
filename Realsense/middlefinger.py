@@ -72,11 +72,12 @@ while True:
                 handList.append((cx, cy))
             for point in handList:
                 cv2.circle(img, point, 2, (255, 255, 0), cv2.FILLED)
-            upCount = 0
+            middleAboveCount = 0
             for coordinate in finger_Coord:
-                
                 if handList[middle_Coord[0]][1] + 28.5  <  handList[coordinate[0]][1]:
-                    cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
+                    middleAboveCount += 1
+                    if(middleAboveCount == 4):
+                        cv2.putText(img, "middle", (150,150), cv2.FONT_HERSHEY_PLAIN, 12, (0,255,0), 12)
                     # upCount += 1
             #     if handList[coordinate[0]][1] < handList[coordinate[1]][1]: # if the 0th index of a coordinate in finger_coords < 1st index of a coordinate in finger_cords (if a finger is raised)
             #         upCount += 1
